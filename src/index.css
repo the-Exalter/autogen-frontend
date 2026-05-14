@@ -1,0 +1,155 @@
+/* ─── Design tokens ──────────────────────────────────────────────────────── */
+:root {
+  --bg: #08080f;
+  --bg-card: #13131a;
+  --bg-elevated: #1c1c24;
+  --border: rgba(255,255,255,0.06);
+  --border-focus: #6366f1;
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255,255,255,0.55);
+  --text-muted: rgba(255,255,255,0.3);
+  --accent: #6366f1;
+  --accent-dim: rgba(99,102,241,0.15);
+  --accent-hover: #818cf8;
+  --accent-text: #818cf8;
+  --danger: #ef4444;
+  --success: #22c55e;
+  --ai-badge: #6366f1;
+  --radius: 16px;
+  --radius-sm: 8px;
+  --shadow: 0 4px 24px rgba(99,102,241,0.12);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: #08080f;
+  color: #ffffff;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+
+img { display: block; max-width: 100%; }
+
+button { cursor: pointer; font-family: inherit; }
+
+input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #ffffff;
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  outline: none;
+  transition: border-color 0.15s;
+  width: 100%;
+}
+input:focus, select:focus, textarea:focus { border-color: #6366f1; }
+input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.25); }
+
+select option { background: #13131a; }
+
+/* ─── Utilities ──────────────────────────────────────────────────────────── */
+.container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 14px;
+  border: none;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.btn-primary {
+  background: #6366f1;
+  color: #ffffff;
+}
+.btn-primary:hover { background: #818cf8; transform: translateY(-1px); }
+.btn-ghost {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #ffffff;
+}
+.btn-ghost:hover { border-color: rgba(99,102,241,0.5); color: #818cf8; }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-danger:hover { background: #dc2626; }
+.btn-sm { padding: 6px 14px; font-size: 13px; }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.badge-ai {
+  background: rgba(99,102,241,0.15);
+  color: #818cf8;
+  border: 1px solid rgba(99,102,241,0.3);
+}
+.badge-featured { background: #f59e0b; color: #09090b; }
+.badge-user { background: #059669; color: #fff; }
+
+.card {
+  background: #13131a;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #13131a 25%, #1c1c24 50%, #13131a 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s infinite;
+  border-radius: 6px;
+}
+@keyframes skeleton-shimmer { to { background-position: -200% 0; } }
+
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-label { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.55); }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+
+.page-header {
+  padding: 48px 0 32px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 40px;
+}
+
+.section-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(20px, 2.5vw, 28px);
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.divider { height: 1px; background: rgba(255,255,255,0.06); margin: 32px 0; }
+
+.error-msg { color: var(--danger); font-size: 13px; margin-top: 4px; }
+.success-msg { color: var(--success); font-size: 13px; }
+
+@media (max-width: 768px) {
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .container { padding: 0 16px; }
+}
+@media (max-width: 1024px) {
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(2, 1fr); }
+}
