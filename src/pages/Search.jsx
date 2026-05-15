@@ -50,7 +50,23 @@ export default function Search() {
 
   // Redirect to Knowledge page when no results found for a query
   useEffect(() => {
-    if (!loading && vehicles.length === 0 && q) {
+    if (!loading && q) {
+      const queryWords = q.trim().split(/\s+/);
+      const hasMultiWordQuery = queryWords.length >= 2;
+
+      const fullQueryMatch = vehicles.some(v => {
+        const vehicleName = `${v.make} ${v.model}`.toLowerCase();
+        return vehicleName.includes(q.toLowerCase()) ||
+          q.toLowerCase().includes(v.model.toLowerCase());
+      });
+
+      const shouldTriggerAI = (
+        vehicles.length === 0 ||
+        (hasMultiWordQuery && !fullQueryMatch)
+      );
+
+      if (!shouldTriggerAI) return;
+
       const make = params.get('make') || q.split(' ')[0];
       const model = params.get('model') || q.split(' ').slice(1).join(' ') || q;
       const year = params.get('year') || '';
@@ -66,7 +82,7 @@ export default function Search() {
       const timer = setTimeout(() => navigate(path), 800);
       return () => clearTimeout(timer);
     }
-  }, [loading, vehicles, q]);
+  }, [loading, vehicles, q]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
