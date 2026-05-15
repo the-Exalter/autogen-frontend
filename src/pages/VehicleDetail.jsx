@@ -276,9 +276,6 @@ export default function VehicleDetail() {
               >
                 {inCompare ? '✓ In Compare' : '+ Compare'}
               </button>
-              <button className="btn btn-ghost" onClick={handleReadMore}>
-                Read More
-              </button>
             </div>
 
             {vehicle.source === 'user_listing' && (vehicle.seller_name || vehicle.seller_city) && (
@@ -368,6 +365,10 @@ export default function VehicleDetail() {
         )}
 
         {/* ── Read More ────────────────────────────────────────────── */}
+        <button className="btn btn-ghost" onClick={handleReadMore}>
+          📖 Read More
+        </button>
+
         {readMore && (
           <div className="vd-read-more">
             {readMoreLoading && (
