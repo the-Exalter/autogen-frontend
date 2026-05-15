@@ -42,6 +42,19 @@ export default function VehicleDetail() {
   const [forecast, setForecast] = useState(null);
   const [forecastLoading, setForecastLoading] = useState(false);
   const [forecastError, setForecastError] = useState(null);
+  const [readMore, setReadMore] = useState(false);
+  const [readMoreContent, setReadMoreContent] = useState(null);
+  const [readMoreLoading, setReadMoreLoading] = useState(false);
+  const [readMoreStatus, setReadMoreStatus] = useState('');
+  const [readMoreVideos, setReadMoreVideos] = useState([]);
+  const [readMoreError, setReadMoreError] = useState(null);
+  const [openSections, setOpenSections] = useState({
+    fast_facts: true,
+    the_story: false,
+    owners: false,
+    facts: false,
+    watch: false,
+  });
 
   useEffect(() => {
     getVehicle(id)
@@ -103,6 +116,78 @@ export default function VehicleDetail() {
       setForecastError('Forecast unavailable. Please try again.');
     } finally {
       setForecastLoading(false);
+    }
+  };
+
+  const toggleSection = (key) => {
+    setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const handleReadMore = async () => {
+    if (readMoreContent) {
+      setReadMore(true);
+      return;
+    }
+    setReadMore(true);
+    setReadMoreLoading(true);
+    setReadMoreError(null);
+    setReadMoreStatus('Researching...');
+
+    const AI_URL = import.meta.env.VITE_AI_URL || 'http://localhost:8000';
+
+    try {
+      const response = await fetch(`${AI_URL}/read-more-stream`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          make: vehicle.make,
+          model: vehicle.model,
+          year: vehicle.year || null,
+          variant: vehicle.variant || null,
+        }),
+      });
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const parts = buffer.split('\n\n');
+        buffer = parts.pop();
+
+        for (const part of parts) {
+          if (!part.trim()) continue;
+          let eventType = 'message';
+          let dataStr = '';
+          for (const line of part.split('\n')) {
+            if (line.startsWith('event: ')) eventType = line.slice(7).trim();
+            else if (line.startsWith('data: ')) dataStr = line.slice(6);
+          }
+
+          try {
+            const data = JSON.parse(dataStr);
+            if (eventType === 'status') {
+              setReadMoreStatus(data.message);
+            } else if (eventType === 'videos') {
+              setReadMoreVideos(data.videos || []);
+            } else if (eventType === 'done') {
+              setReadMoreContent(data.content);
+              setReadMoreVideos(data.videos || []);
+              setReadMoreLoading(false);
+            } else if (eventType === 'error') {
+              setReadMoreError(data.message);
+              setReadMoreLoading(false);
+            }
+          } catch {}
+        }
+      }
+    } catch (e) {
+      setReadMoreError('Failed to load content. Please try again.');
+      setReadMoreLoading(false);
     }
   };
 
@@ -191,6 +276,9 @@ export default function VehicleDetail() {
               >
                 {inCompare ? '✓ In Compare' : '+ Compare'}
               </button>
+              <button className="btn btn-ghost" onClick={handleReadMore}>
+                Read More
+              </button>
             </div>
 
             {vehicle.source === 'user_listing' && (vehicle.seller_name || vehicle.seller_city) && (
@@ -276,6 +364,153 @@ export default function VehicleDetail() {
           <div className="vd-description">
             <h2 className="section-title" style={{ marginBottom: 16 }}>About</h2>
             <p>{vehicle.description}</p>
+          </div>
+        )}
+
+        {/* ── Read More ────────────────────────────────────────────── */}
+        {readMore && (
+          <div className="vd-read-more">
+            {readMoreLoading && (
+              <div className="vd-read-more__loading">
+                <div className="vd-read-more__pulse" />
+                <span>{readMoreStatus}</span>
+              </div>
+            )}
+
+            {readMoreError && !readMoreLoading && (
+              <div className="vd-read-more__error">
+                <p>{readMoreError}</p>
+                <button className="btn btn-ghost" onClick={handleReadMore}>
+                  Try Again
+                </button>
+              </div>
+            )}
+
+            {readMoreContent && !readMoreLoading && (
+              <div className="vd-read-more__sections">
+
+                <div className="vd-read-more__section">
+                  <button
+                    className="vd-read-more__toggle"
+                    onClick={() => toggleSection('fast_facts')}
+                  >
+                    <span>⚡ Fast Facts</span>
+                    <span>{openSections.fast_facts ? '▲' : '▼'}</span>
+                  </button>
+                  {openSections.fast_facts && (
+                    <div className="vd-read-more__content">
+                      <div className="vd-read-more__facts-grid">
+                        {readMoreContent.fast_facts?.map((fact, i) => (
+                          <div key={i} className="vd-read-more__fact-card">
+                            <div className="vd-read-more__fact-label">{fact.label}</div>
+                            <div className="vd-read-more__fact-value">{fact.value}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {readMoreContent.the_story && (
+                  <div className="vd-read-more__section">
+                    <button
+                      className="vd-read-more__toggle"
+                      onClick={() => toggleSection('the_story')}
+                    >
+                      <span>📖 The Story</span>
+                      <span>{openSections.the_story ? '▲' : '▼'}</span>
+                    </button>
+                    {openSections.the_story && (
+                      <div className="vd-read-more__content">
+                        <h4 className="vd-read-more__story-title">
+                          {readMoreContent.the_story.title}
+                        </h4>
+                        {readMoreContent.the_story.paragraphs?.map((p, i) => (
+                          <p key={i} className="vd-read-more__story-para">{p}</p>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {readMoreContent.what_owners_say?.length > 0 && (
+                  <div className="vd-read-more__section">
+                    <button
+                      className="vd-read-more__toggle"
+                      onClick={() => toggleSection('owners')}
+                    >
+                      <span>💬 What Owners Say</span>
+                      <span>{openSections.owners ? '▲' : '▼'}</span>
+                    </button>
+                    {openSections.owners && (
+                      <div className="vd-read-more__content">
+                        {readMoreContent.what_owners_say.map((item, i) => (
+                          <div key={i} className="vd-read-more__quote">
+                            <p className="vd-read-more__quote-text">"{item.quote}"</p>
+                            <span className="vd-read-more__quote-source">— {item.source}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {readMoreContent.notable_facts?.length > 0 && (
+                  <div className="vd-read-more__section">
+                    <button
+                      className="vd-read-more__toggle"
+                      onClick={() => toggleSection('facts')}
+                    >
+                      <span>🔍 Notable Facts</span>
+                      <span>{openSections.facts ? '▲' : '▼'}</span>
+                    </button>
+                    {openSections.facts && (
+                      <div className="vd-read-more__content">
+                        <ul className="vd-read-more__notable-list">
+                          {readMoreContent.notable_facts.map((fact, i) => (
+                            <li key={i} className="vd-read-more__notable-item">{fact}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {readMoreVideos.length > 0 && (
+                  <div className="vd-read-more__section">
+                    <button
+                      className="vd-read-more__toggle"
+                      onClick={() => toggleSection('watch')}
+                    >
+                      <span>▶ Watch</span>
+                      <span>{openSections.watch ? '▲' : '▼'}</span>
+                    </button>
+                    {openSections.watch && (
+                      <div className="vd-read-more__content">
+                        <div className="vd-read-more__videos">
+                          {readMoreVideos.slice(0, 2).map((video, i) => (
+                            <div key={i} className="vd-read-more__video">
+                              <iframe
+                                width="100%"
+                                height="315"
+                                src={`https://www.youtube.com/embed/${video.id}`}
+                                title={video.title}
+                                frameBorder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                                style={{ borderRadius: 12 }}
+                              />
+                              <p className="vd-read-more__video-title">{video.title}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+              </div>
+            )}
           </div>
         )}
 
