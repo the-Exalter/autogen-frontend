@@ -28,7 +28,7 @@ export default function Knowledge() {
     if (vehicle?._id && !isStreaming) {
       const timer = setTimeout(() => {
         navigate(`/vehicle/${vehicle._id}`, { replace: true });
-      }, 1500);
+      }, 3000);
       return () => clearTimeout(timer);
     }
   }, [vehicle, isStreaming, navigate]);
@@ -117,9 +117,24 @@ export default function Knowledge() {
               <p className="knowledge-card__description">{vehicle.description}</p>
             )}
 
-            <p className="knowledge-card__redirect">
-              Loading full details…
-            </p>
+            <div style={{ marginTop: 24, display: 'flex',
+                          alignItems: 'center', gap: 12 }}>
+              {vehicle._id ? (
+                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)' }}>
+                  Redirecting to full details…
+                </p>
+              ) : (
+                <button
+                  className="btn btn-primary"
+                  onClick={() => window.location.href =
+                    `/search?q=${encodeURIComponent(
+                      `${vehicle.make} ${vehicle.model}`
+                    )}`}
+                >
+                  View Details →
+                </button>
+              )}
+            </div>
           </div>
         )}
       </div>
