@@ -534,30 +534,84 @@ export default function VehicleDetail() {
           )}
 
           {usedMarket && (
-            usedMarket.found === false ? (
-              <div className="vd-used-market__result">
-                <p className="muted">No used listings found in your area.</p>
-              </div>
-            ) : (
-              <div className="vd-used-market__result">
-                <div className="vd-used-market__status">{usedMarket.status}</div>
-                {usedMarket.regional_price_range && (
-                  <div className="vd-used-market__row">
-                    <span className="vd-spec__label">Price Range</span>
-                    <span className="vd-spec__value">{usedMarket.regional_price_range}</span>
+            <div className="vd-used-market__result">
+              {!usedMarket.found ? (
+                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14 }}>
+                  No listings found for this vehicle on Cars.com.
+                </p>
+              ) : (
+                <>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: 16,
+                  }}>
+                    <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>
+                      {usedMarket.total_count} listings found on Cars.com
+                    </span>
+                    <a
+                      href={usedMarket.source_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ fontSize: 12, color: '#6366f1', textDecoration: 'none' }}
+                    >
+                      View all on Cars.com →
+                    </a>
                   </div>
-                )}
-                {usedMarket.sourcing_locations?.length > 0 && (
-                  <div className="vd-used-market__row">
-                    <span className="vd-spec__label">Available In</span>
-                    <span className="vd-spec__value">{usedMarket.sourcing_locations.join(', ')}</span>
+
+                  <div className="vd-used-market__listings">
+                    {usedMarket.listings.map((listing, i) => (
+                      <a
+                        key={i}
+                        href={listing.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="vd-used-market__listing"
+                      >
+                        {listing.image && (
+                          <div className="vd-used-market__listing-img">
+                            <img
+                              src={listing.image}
+                              alt={listing.title}
+                              onError={(e) => e.target.style.display = 'none'}
+                            />
+                          </div>
+                        )}
+                        <div className="vd-used-market__listing-info">
+                          <div className="vd-used-market__listing-title">
+                            {listing.title}
+                          </div>
+                          <div className="vd-used-market__listing-meta">
+                            {listing.price_usd && (
+                              <span className="vd-used-market__listing-price">
+                                ${listing.price_usd.toLocaleString()}
+                              </span>
+                            )}
+                            {listing.mileage_mi && (
+                              <span className="vd-used-market__listing-mileage">
+                                {listing.mileage_mi.toLocaleString()} mi
+                              </span>
+                            )}
+                          </div>
+                          {(listing.dealer || listing.location) && (
+                            <div className="vd-used-market__listing-dealer">
+                              {listing.dealer && <span>{listing.dealer}</span>}
+                              {listing.location && (
+                                <span style={{ color: 'rgba(255,255,255,0.3)' }}>
+                                  {' • '}{listing.location}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                        <div className="vd-used-market__listing-arrow">→</div>
+                      </a>
+                    ))}
                   </div>
-                )}
-                {usedMarket.import_notes && (
-                  <div className="vd-used-market__notes">{usedMarket.import_notes}</div>
-                )}
-              </div>
-            )
+                </>
+              )}
+            </div>
           )}
         </div>
 
