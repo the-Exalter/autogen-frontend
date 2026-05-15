@@ -537,7 +537,7 @@ export default function VehicleDetail() {
             <div className="vd-used-market__result">
               {!usedMarket.found ? (
                 <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14 }}>
-                  No listings found for this vehicle on Cars.com.
+                  No listings found for this vehicle.
                 </p>
               ) : (
                 <>
@@ -548,15 +548,15 @@ export default function VehicleDetail() {
                     marginBottom: 16,
                   }}>
                     <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>
-                      {usedMarket.total_count} listings found on Cars.com
+                      {usedMarket.listings?.length} listings found across the web
                     </span>
                     <a
-                      href={usedMarket.source_url}
+                      href={`https://www.google.com/search?q=${encodeURIComponent(usedMarket.search_query)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{ fontSize: 12, color: '#6366f1', textDecoration: 'none' }}
                     >
-                      View all on Cars.com →
+                      Search more →
                     </a>
                   </div>
 
@@ -569,39 +569,34 @@ export default function VehicleDetail() {
                         rel="noopener noreferrer"
                         className="vd-used-market__listing"
                       >
-                        {listing.image && (
-                          <div className="vd-used-market__listing-img">
-                            <img
-                              src={listing.image}
-                              alt={listing.title}
-                              onError={(e) => e.target.style.display = 'none'}
-                            />
-                          </div>
-                        )}
                         <div className="vd-used-market__listing-info">
                           <div className="vd-used-market__listing-title">
                             {listing.title}
                           </div>
                           <div className="vd-used-market__listing-meta">
-                            {listing.price_usd && (
+                            {listing.price_str && (
                               <span className="vd-used-market__listing-price">
-                                ${listing.price_usd.toLocaleString()}
+                                {listing.price_str}
                               </span>
                             )}
-                            {listing.mileage_mi && (
-                              <span className="vd-used-market__listing-mileage">
-                                {listing.mileage_mi.toLocaleString()} mi
-                              </span>
-                            )}
+                            <span style={{
+                              fontSize: 11,
+                              background: 'rgba(255,255,255,0.06)',
+                              padding: '2px 8px',
+                              borderRadius: 4,
+                              color: 'rgba(255,255,255,0.4)',
+                            }}>
+                              {listing.source}
+                            </span>
                           </div>
-                          {(listing.dealer || listing.location) && (
-                            <div className="vd-used-market__listing-dealer">
-                              {listing.dealer && <span>{listing.dealer}</span>}
-                              {listing.location && (
-                                <span style={{ color: 'rgba(255,255,255,0.3)' }}>
-                                  {' • '}{listing.location}
-                                </span>
-                              )}
+                          {listing.description && (
+                            <div style={{
+                              fontSize: 12,
+                              color: 'rgba(255,255,255,0.3)',
+                              marginTop: 4,
+                              lineHeight: 1.4,
+                            }}>
+                              {listing.description}
                             </div>
                           )}
                         </div>
