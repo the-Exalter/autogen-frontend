@@ -23,17 +23,7 @@ export default function Knowledge() {
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // When streaming completes and vehicle has _id, redirect to /vehicle/:id
-  useEffect(() => {
-    if (vehicle?._id && !isStreaming) {
-      const timer = setTimeout(() => {
-        navigate(`/vehicle/${vehicle._id}`, { replace: true });
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [vehicle, isStreaming, navigate]);
-
-  const displayName = `${decodeURIComponent(make)} ${decodeURIComponent(model)}${year ? ` ${year}` : ''}`;
+const displayName = `${decodeURIComponent(make)} ${decodeURIComponent(model)}${year ? ` ${year}` : ''}`;
 
   return (
     <div className="knowledge-page">
@@ -120,18 +110,23 @@ export default function Knowledge() {
             <div style={{ marginTop: 24, display: 'flex',
                           alignItems: 'center', gap: 12 }}>
               {vehicle._id ? (
-                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)' }}>
-                  Redirecting to full details…
-                </p>
-              ) : (
                 <button
                   className="btn btn-primary"
-                  onClick={() => window.location.href =
+                  onClick={() => navigate(`/vehicle/${vehicle._id}`,
+                    { replace: true })}
+                >
+                  View Full Details →
+                </button>
+              ) : (
+                <button
+                  className="btn btn-ghost"
+                  onClick={() => navigate(
                     `/search?q=${encodeURIComponent(
                       `${vehicle.make} ${vehicle.model}`
-                    )}`}
+                    )}`
+                  )}
                 >
-                  View Details →
+                  Search Database →
                 </button>
               )}
             </div>
